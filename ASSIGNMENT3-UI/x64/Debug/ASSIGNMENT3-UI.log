@@ -1,0 +1,15 @@
+﻿  Button.cpp
+  Deck.cpp
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Deck.cpp(5,12): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Main.cpp
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Main.cpp(114,28): warning C4244: 'argument': conversion from 'float' to 'Uint32', possible loss of data
+  Card.cpp
+  Player.cpp
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Player.cpp(60,20): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  Sprite.cpp
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Sprite.cpp(101,41): warning C4312: 'type cast': conversion from 'int' to 'void *' of greater size
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Sprite.cpp(118,40): warning C4312: 'type cast': conversion from 'int' to 'void *' of greater size
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Sprite.cpp(126,41): warning C4312: 'type cast': conversion from 'int' to 'void *' of greater size
+  Generating Code...
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Main.cpp(90): warning C4715: 'init': not all control paths return a value
+  ASSIGNMENT3-UI.vcxproj -> D:\TFS projects\Working\VGP122_A2_Wnittley_David\x64\Debug\ASSIGNMENT3-UI.exe

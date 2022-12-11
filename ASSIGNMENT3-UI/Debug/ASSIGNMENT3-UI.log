@@ -1,0 +1,4 @@
+﻿  Main.cpp
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Main.cpp(114,28): warning C4244: 'argument': conversion from 'float' to 'Uint32', possible loss of data
+D:\TFS projects\Working\VGP122_A2_Wnittley_David\ASSIGNMENT3-UI\Main.cpp(90): warning C4715: 'init': not all control paths return a value
+  ASSIGNMENT3-UI.vcxproj -> D:\TFS projects\Working\VGP122_A2_Wnittley_David\Debug\ASSIGNMENT3-UI.exe
