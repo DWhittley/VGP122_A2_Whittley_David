@@ -225,9 +225,10 @@ void eventLoop()
 					doubleDown->setPressed(false);
 
 					//ADD DOUBLE DOWN LOGIC
-					// check if double down is allowed (check only two cards dealt and check cards value must total 9, 10, or 11)
-					// if yes then double bet
-					// if no, then do nothing and move on
+					// if Player::getCardCount() == 2 && Player::getTotal() > 8 && Player::getTotal() < 12;  check if double down is allowed (check only two cards dealt and check cards value must total 9, 10, or 11)
+						// do double down;
+					// tell them they can't do it.
+					
 				}
 				else if (!split->isPressed() && split->isVisible() && event.button.x >= split->getXPos() && event.button.x <= split->getXPos() + split->getWidth() &&
 					event.button.y >= split->getYPos() && event.button.y <= split->getYPos() + split->getHeight())
@@ -243,6 +244,7 @@ void eventLoop()
 			}
 		}
 	}
+
 }
 
 void physicsLoop()
