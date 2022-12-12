@@ -39,6 +39,7 @@ Button* doubleDown = nullptr;
 Button* split = nullptr;
 
 Player* player;
+Player* splitPlayer;
 Player* dealer;
 
 bool done = false;

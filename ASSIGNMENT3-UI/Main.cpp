@@ -3,9 +3,12 @@
 bool init();
 void gameLoop();
 void eventLoop();
+void resolve();
+void dealerPlay();
 void physicsLoop();
 void renderLoop();
 void shutdown();
+void reset();
 
 int main(int argv, char** argc)
 {
@@ -79,6 +82,7 @@ bool init()
 	deck = new Deck(renderer);
 
 	player = new Player();
+	splitPlayer = new Player();
 	dealer = new Player();
 
 	play->setCurrentButton(0);
@@ -122,6 +126,9 @@ void eventLoop()
 {
 	SDL_Event event;
 
+	bool hasSplit = false;
+	bool player1Done = false;
+
 	while (SDL_PollEvent(&event))
 	{
 		if (event.key.repeat == 0)
@@ -149,36 +156,75 @@ void eventLoop()
 				else if (!hit->isPressed() && hit->isVisible() && event.button.x >= hit->getXPos() && event.button.x <= hit->getXPos() + hit->getWidth() &&
 					event.button.y >= hit->getYPos() && event.button.y <= hit->getYPos() + hit->getHeight())
 				{
-					hit->onPress();
-
-					player->addCard(deck->getCard());
+					if (!player1Done) {
+						hit->onPress();
+						player->addCard(deck->getCard());
+						if (player->getTotal() > 21 && hasSplit) {
+							player1Done = true;
+							cout << "Player busted hand one.";
+							//This is a bust for hand1
+						}
+						else if (player->getTotal() > 21 && !hasSplit) {
+							cout << "Player busted hand one.";
+							cout << player->getTotal();
+							renderLoop();
+							SDL_Delay(1500);
+							reset();
+						}
+					}
+					if (hasSplit) {
+						hit->onPress();
+						splitPlayer->addCard(deck->getCard());
+						if (splitPlayer->getTotal() > 21 && player->getTotal() > 21) {
+							cout << "Player busted hand one and two.";
+							SDL_Delay(1500);
+							reset();
+						}
+						else if (splitPlayer->getTotal() > 21 && player->getTotal() < 22) {
+							cout << "Player busted hand two.";
+							dealerPlay();
+						}
+					}
 
 					//ADD HIT LOGIC
-					// highlight hit button?
 				}
 				else if (!stand->isPressed() && stand->isVisible() && event.button.x >= stand->getXPos() && event.button.x <= stand->getXPos() + stand->getWidth() &&
 					event.button.y >= stand->getYPos() && event.button.y <= stand->getYPos() + stand->getHeight())
 				{
-					//ADD STAND LOGIC
-					// highlight stand button?
+					if (!player1Done) {
+						player1Done = true;
+					}
+					if (!hasSplit) {
+						//play dealer
+						//Resolve
+					}
+					else {
+						// play dealer
+						//Resolve hand 1 and hand 2
+					}
 				}
 				else if (!pass->isPressed() && pass->isVisible() && event.button.x >= pass->getXPos() && event.button.x <= pass->getXPos() + pass->getWidth() &&
 					event.button.y >= pass->getYPos() && event.button.y <= pass->getYPos() + pass->getHeight())
 				{
 					//ADD PASS LOGIC
-					// highlight pass button?
 				}
 				else if (!doubleDown->isPressed() && doubleDown->isVisible() && event.button.x >= doubleDown->getXPos() && event.button.x <= doubleDown->getXPos() + doubleDown->getWidth() &&
 					event.button.y >= doubleDown->getYPos() && event.button.y <= doubleDown->getYPos() + doubleDown->getHeight())
 				{
+					player->addCard(deck->getCard());
 					//ADD DOUBLE DOWN LOGIC
-					// highlight double down button?
 				}
 				else if (!split->isPressed() && split->isVisible() && event.button.x >= split->getXPos() && event.button.x <= split->getXPos() + split->getWidth() &&
 					event.button.y >= split->getYPos() && event.button.y <= split->getYPos() + split->getHeight())
 				{
+					if (player->getCardCount() == 2 && (player->getCard(0) == player->getCard(1))) {
+						splitPlayer->addCard(player->popCard());
+						hasSplit = true;
+
+					}
+					//Create new player
+					// cards fopr this player going to be player.position.y + card.height + gap
 					//ADD SPLIT LOGIC
-					// highlight split button?
 				}
 
 				break;
@@ -300,9 +346,20 @@ void renderLoop()
 		for (int i = 0; i < player->getCardCount(); ++i)
 		{
 			deck->setXPos(200 + (i * 269));
-			deck->setYPos(700);
+			deck->setYPos(480);
 
 			deck->drawCard(player->getCard(i));
+		}
+	}
+	
+	if (splitPlayer->getCardCount() > 0)
+	{
+		for (int i = 0; i < splitPlayer->getCardCount(); ++i)
+		{
+			deck->setXPos(200 + (i * 269));
+			deck->setYPos(840);
+
+			deck->drawCard(splitPlayer->getCard(i));
 		}
 	}
 
@@ -311,13 +368,90 @@ void renderLoop()
 		for (int i = 0; i < dealer->getCardCount(); ++i)
 		{
 			deck->setXPos(200 + (i * 269));
-			deck->setYPos(200);
+			deck->setYPos(140);
 
 			deck->drawCard(dealer->getCard(i));
 		}
 	}
 
 	SDL_RenderPresent(renderer);
+}
+
+void reset() {
+	delete player;
+	delete dealer;
+	delete splitPlayer;
+	delete deck;
+
+	deck = new Deck(renderer);
+	player = new Player();
+	splitPlayer = new Player();
+	dealer = new Player();
+
+	player->addCard(deck->getCard());
+
+	Card* temp = deck->getCard();
+	temp->setBack(true);
+	dealer->addCard(temp);
+
+	player->addCard(deck->getCard());
+	dealer->addCard(deck->getCard());
+}
+
+void dealerPlay() {
+	dealer->getCard(0)->setBack(false);
+	while (dealer->getTotal() < 17) {
+		dealer->addCard(deck->getCard());
+	}
+	resolve();
+}
+
+void resolve() {
+
+	/*if (HandValue(player.hand) > 21) {
+		cout << "You Lost this hand!" << endl;
+		CRED -= player.bet;
+		if (hasSplit == true)
+			PlayerChoiceSplit();
+		Game();
+	}
+	else if (HandValue(player.hand) == 21) {
+		if (HandValue(dealer.hand) == 21) {
+			cout << "Push!" << endl;
+			if (hasSplit == true)
+				EvaluateSplit();
+			Game();
+		}
+		else {
+			cout << "You win!" << endl;
+			CRED += player.bet;
+			if (hasSplit == true)
+				EvaluateSplit();
+			Game();
+		}
+	}
+	else if ((HandValue(player.hand) > (HandValue(dealer.hand))) || (HandValue(dealer.hand) > 21)) {
+		cout << "You win!" << endl;
+		CRED += player.bet;
+		if (hasSplit == true)
+			EvaluateSplit();
+		Game();
+	}
+	else if ((HandValue(player.hand)) == (HandValue(dealer.hand))) {
+		cout << "Push!" << endl;
+		if (hasSplit == true)
+			EvaluateSplit();
+		Game();
+	}
+	else {
+		cout << "You Lost this hand!" << endl;
+		CRED -= player.bet;
+		if (hasSplit == true)
+			EvaluateSplit();
+		Game();
+	}*/
+
+
 }
 
 void shutdown()

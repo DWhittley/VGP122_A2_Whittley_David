@@ -42,6 +42,14 @@ void Player::addCard(Card* c)
 	}
 }
 
+Card* Player::popCard()
+{
+	Card* temp = hand.back();
+	hand.pop_back();
+
+	return temp;
+}
+
 Card* Player::getCard(int index)
 {
 	if (index >= 0 && index <= hand.size() - 1)

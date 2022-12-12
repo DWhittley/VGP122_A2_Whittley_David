@@ -15,6 +15,7 @@ public:
 	void addCard(Card*);
 
 	Card* getCard(int);
+	Card* popCard();
 	int getTotal();
 	int getCardCount();
 
