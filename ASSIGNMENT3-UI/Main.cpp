@@ -284,6 +284,11 @@ void eventLoop()
 						dealer->getCard(0)->setBack(false);
 						while (dealer->getTotal() < 17)
 							dealer->addCard(deck->getCard());
+						if (dealer->getTotal() > 21) {
+							cout << "Dealer: " << dealer->getTotal() << endl;
+							cout << "Player: " << player->getTotal() << endl;
+							cout << "Dealer busted so Player hand wins" << endl;
+						}
 						if (dealer->getTotal() < player->getTotal())
 						{
 							cout << "Dealer: " << dealer->getTotal() << endl;
@@ -492,7 +497,13 @@ void dealerPlay() {
 	while (dealer->getTotal() < 17) {
 		dealer->addCard(deck->getCard());
 	}
-	resolve();
+	if (dealer->getTotal() > 21) {
+		cout << "Dealer busted, so Player wins hand(s) that didn't bust/pass" << endl;
+	}
+
+	renderLoop();
+	SDL_Delay(1500);
+	reset();
 }
 
 void resolve() {
