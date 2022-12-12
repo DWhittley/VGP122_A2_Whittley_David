@@ -165,8 +165,8 @@ void eventLoop()
 							//This is a bust for hand1
 						}
 						else if (player->getTotal() > 21 && !hasSplit) {
-							cout << "Player busted hand one.";
-							cout << player->getTotal();
+							cout << "Player busted hand one with ";
+							cout << player->getTotal() << endl;
 							renderLoop();
 							SDL_Delay(1500);
 							reset();
@@ -176,17 +176,15 @@ void eventLoop()
 						hit->onPress();
 						splitPlayer->addCard(deck->getCard());
 						if (splitPlayer->getTotal() > 21 && player->getTotal() > 21) {
-							cout << "Player busted hand one and two.";
+							cout << "Player busted hand one and two." << endl;
 							SDL_Delay(1500);
 							reset();
 						}
 						else if (splitPlayer->getTotal() > 21 && player->getTotal() < 22) {
-							cout << "Player busted hand two.";
+							cout << "Player busted hand two." << endl;
 							dealerPlay();
 						}
 					}
-
-					//ADD HIT LOGIC
 				}
 				else if (!stand->isPressed() && stand->isVisible() && event.button.x >= stand->getXPos() && event.button.x <= stand->getXPos() + stand->getWidth() &&
 					event.button.y >= stand->getYPos() && event.button.y <= stand->getYPos() + stand->getHeight())
@@ -195,36 +193,69 @@ void eventLoop()
 						player1Done = true;
 					}
 					if (!hasSplit) {
-						//play dealer
-						//Resolve
+						dealer->getCard(0)->setBack(false);
+						while (dealer->getTotal() < 17)
+							dealer->addCard(deck->getCard());
+						
+						if (dealer->getTotal() < player->getTotal())
+							cout << "Player hand wins" << endl;
+						else if (dealer->getTotal() == player->getTotal())
+							cout << "Player hand is a push" << endl;
+						else
+							cout << "Dealer hand wins" << endl;
+							
+						SDL_Delay(2000);
+						reset();
 					}
 					else {
-						// play dealer
-						//Resolve hand 1 and hand 2
+						dealer->getCard(0)->setBack(false);
+						while (dealer->getTotal() < 17)
+							dealer->addCard(deck->getCard());
+						if (dealer->getTotal() < player->getTotal())
+							cout << "Player hand wins" << endl;
+						else if (dealer->getTotal() == player->getTotal())
+							cout << "Player hand is a push" << endl;
+						else
+							cout << "Dealer hand loses" << endl;
+
+						if (dealer->getTotal() < splitPlayer->getTotal())
+							cout << "Player split hand wins" << endl;
+						else if (dealer->getTotal() == splitPlayer->getTotal())
+							cout << "Player split hand is a push" << endl;
+						else
+							cout << "Dealer splith hand loses" << endl;
+						
+						SDL_Delay(2000);
+						reset();
 					}
 				}
 				else if (!pass->isPressed() && pass->isVisible() && event.button.x >= pass->getXPos() && event.button.x <= pass->getXPos() + pass->getWidth() &&
 					event.button.y >= pass->getYPos() && event.button.y <= pass->getYPos() + pass->getHeight())
 				{
-					//ADD PASS LOGIC
+					renderLoop();
+					SDL_Delay(1500);
+					reset();
 				}
 				else if (!doubleDown->isPressed() && doubleDown->isVisible() && event.button.x >= doubleDown->getXPos() && event.button.x <= doubleDown->getXPos() + doubleDown->getWidth() &&
 					event.button.y >= doubleDown->getYPos() && event.button.y <= doubleDown->getYPos() + doubleDown->getHeight())
 				{
-					player->addCard(deck->getCard());
-					//ADD DOUBLE DOWN LOGIC
+					if (player->getCardCount() == 2)
+						player->addCard(deck->getCard());
+					else
+						cout << "Can only double down on initial hand." << endl;
 				}
 				else if (!split->isPressed() && split->isVisible() && event.button.x >= split->getXPos() && event.button.x <= split->getXPos() + split->getWidth() &&
 					event.button.y >= split->getYPos() && event.button.y <= split->getYPos() + split->getHeight())
 				{
-					if (player->getCardCount() == 2 && (player->getCard(0) == player->getCard(1))) {
-						splitPlayer->addCard(player->popCard());
+					if (player->getCardCount() == 2 && (player->getCard(0)->getFace() == player->getCard(1)->getFace())) {
+						splitPlayer->addCard(player->popCard()); //Create new player using player's second card
+						player->addCard(deck->getCard()); // add a card to player hand
+						splitPlayer->addCard(deck->getCard());  // add a card to player split hand
+						renderLoop(); // re-render 
 						hasSplit = true;
-
 					}
-					//Create new player
-					// cards fopr this player going to be player.position.y + card.height + gap
-					//ADD SPLIT LOGIC
+					else
+						cout << "Player tried to split without having only 2 cards that are the same" << endl;
 				}
 
 				break;
@@ -237,10 +268,6 @@ void eventLoop()
 				else if (!hit->isPressed() && hit->isVisible() && event.button.x >= hit->getXPos() && event.button.x <= hit->getXPos() + hit->getWidth() &&
 					event.button.y >= hit->getYPos() && event.button.y <= hit->getYPos() + hit->getHeight())
 				{
-					//Player::getTotal(int handValue);
-
-					//if (handValue > 21)
-						// do some "you lose" actions (reduce credits by bet value, move to next hand if split, etc.)
 
 					//ADD HIT LOGIC
 				}
@@ -249,12 +276,6 @@ void eventLoop()
 				{
 					stand->setPressed(false);
 
-					// if (split == true)
-					// {
-					//		resolve second player hand
-					// }
-					// else
-					//		resolve dealer hand and compare for results (both hands if split)
 					//ADD STAND LOGIC
 				}
 				else if (!pass->isPressed() && pass->isVisible() && event.button.x >= pass->getXPos() && event.button.x <= pass->getXPos() + pass->getWidth() &&
@@ -262,7 +283,6 @@ void eventLoop()
 				{
 					pass->setPressed(false);
 
-					// check if pass is allowed, if yes then reduce credits by half of bet (rounded up), if not then do nothing and move on
 					//ADD PASS LOGIC
 				}
 				else if (!doubleDown->isPressed() && doubleDown->isVisible() && event.button.x >= doubleDown->getXPos() && event.button.x <= doubleDown->getXPos() + doubleDown->getWidth() &&
@@ -271,9 +291,6 @@ void eventLoop()
 					doubleDown->setPressed(false);
 
 					//ADD DOUBLE DOWN LOGIC
-					// if Player::getCardCount() == 2 && Player::getTotal() > 8 && Player::getTotal() < 12;  check if double down is allowed (check only two cards dealt and check cards value must total 9, 10, or 11)
-						// do double down;
-					// tell them they can't do it.
 					
 				}
 				else if (!split->isPressed() && split->isVisible() && event.button.x >= split->getXPos() && event.button.x <= split->getXPos() + split->getWidth() &&
@@ -282,9 +299,7 @@ void eventLoop()
 					split->setPressed(false);
 
 					//ADD SPLIT LOGIC
-					// check if split allowed (check only two cards dealt and cards are the same (not card value!))
-					// if yes, move second card to first card of player second hand
-					// if no, then do nothing and move on
+
 				}
 				break;
 			}
@@ -292,6 +307,7 @@ void eventLoop()
 	}
 
 }
+
 
 void physicsLoop()
 {

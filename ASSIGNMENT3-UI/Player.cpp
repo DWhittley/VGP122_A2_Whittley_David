@@ -33,8 +33,10 @@ void Player::addCard(Card* c)
 	case 'K':
 		total += 10;
 		break;
-	case 'A':
-		total = (total < 11) ? total + 11 : total + 1;
+	case 'A': // changed this logic from JP's to assess the Ace differently
+		total += 1;
+		if (total <= 11)
+			total += 10;
 		break;
 	default:
 		total += (int)face - 48;
