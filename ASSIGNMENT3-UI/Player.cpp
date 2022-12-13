@@ -62,7 +62,33 @@ Card* Player::getCard(int index)
 
 int Player::getTotal()
 {
-	return total;
+	bool hasAce = false;
+	int temp = 0; //setting up the temp hand value
+
+	for (int i = 0; i < hand.size(); i++) 
+	{
+		char face = hand[i]->getFace();
+		switch (face)
+		{
+		case 'T':
+		case 'J':
+		case 'Q':
+		case 'K':
+			temp += 10;
+			break;
+		case 'A': // changed this logic from JP's to assess the Ace differently
+			temp += 1;
+			hasAce = true;
+		default:
+			temp += (int)face - 48;
+			break;
+		}
+	}
+	if (hasAce = true && temp < 11)
+		temp += 10;
+	
+	return temp;
+
 }
 
 int Player::getCardCount()
