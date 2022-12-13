@@ -95,3 +95,11 @@ int Player::getCardCount()
 {
 	return hand.size();
 }
+
+bool Player::hasBust() {
+	return _hasBust;
+}
+
+void Player::setBusted() {
+	_hasBust = true;
+}

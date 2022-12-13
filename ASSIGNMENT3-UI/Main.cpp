@@ -3,7 +3,7 @@
 bool init();
 void gameLoop();
 void eventLoop();
-void resolve();
+void resolve(bool);
 void dealerPlay();
 void physicsLoop();
 void renderLoop();
@@ -100,6 +100,7 @@ void gameLoop()
 	int endTime = 0;
 	int deltaTime = 0;
 
+
 	while (!done)
 	{
 		startTime = SDL_GetTicks();
@@ -122,13 +123,12 @@ void gameLoop()
 	}
 }
 
+bool hasSplit = false;
+bool player1Done = false;
+
 void eventLoop()
 {
 	SDL_Event event;
-
-	bool hasSplit = false;
-	bool player1Done = false;
-	bool playerSplitDone = false;
 
 	while (SDL_PollEvent(&event))
 	{
@@ -151,7 +151,8 @@ void eventLoop()
 					temp->setBack(true);
 					dealer->addCard(temp);
 
-					player->addCard(deck->getCard());
+					//player->addCard(deck->getCard());
+					player->addCard(player->getCard(0));//Split test logic
 					dealer->addCard(deck->getCard());
 				}
 				else if (!hit->isPressed() && hit->isVisible() && event.button.x >= hit->getXPos() && event.button.x <= hit->getXPos() + hit->getWidth() &&
@@ -163,106 +164,51 @@ void eventLoop()
 						if (player->getTotal() > 21 && hasSplit) {
 							player1Done = true;
 							cout << "Player busted hand one.";
+							player->setBusted();
 							//This is a bust for hand1
 						}
 						else if (player->getTotal() > 21 && !hasSplit) {
 							cout << "Player busted hand one with ";
 							cout << player->getTotal() << endl;
+							player->setBusted();
 							renderLoop();
 							SDL_Delay(1500);
 							reset();
 						}
-					}
-					if (hasSplit) {
+					} else if (hasSplit && player1Done) {
 						hit->onPress();
 						splitPlayer->addCard(deck->getCard());
 						if (splitPlayer->getTotal() > 21 && player->getTotal() > 21) {
 							cout << "Player busted hand one and two." << endl;
-							playerSplitDone = true;
+							player->setBusted();
+							splitPlayer->setBusted();
+							renderLoop();
 							SDL_Delay(1500);
 							reset();
 						}
 						else if (splitPlayer->getTotal() > 21 && player->getTotal() < 22) {
 							cout << "Player busted hand two." << endl;
-							playerSplitDone = true;
+							splitPlayer->setBusted();
 							dealerPlay();
+							resolve(hasSplit);
 						}
 					}
 				}
 				else if (!stand->isPressed() && stand->isVisible() && event.button.x >= stand->getXPos() && event.button.x <= stand->getXPos() + stand->getWidth() &&
 					event.button.y >= stand->getYPos() && event.button.y <= stand->getYPos() + stand->getHeight())
 				{
+					if (player1Done && hasSplit) {
+						cout << "Player splithand stands with: " << splitPlayer->getTotal() << endl;
+						dealerPlay();
+						resolve(hasSplit);
+					}
 					if (!player1Done) {
+						cout << "Player hand stands with: " << splitPlayer->getTotal() << endl;
 						player1Done = true;
 					}
 					if (!hasSplit) {
-						dealer->getCard(0)->setBack(false);
-						while (dealer->getTotal() < 17)
-							dealer->addCard(deck->getCard());
-						
-						if (dealer->getTotal() < player->getTotal()) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Player hand wins" << endl;
-						}
-							
-						else if (dealer->getTotal() == player->getTotal()) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Player hand is a push" << endl;
-						}
-						else {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Dealer hand wins" << endl;
-						}
-						renderLoop();
-						SDL_Delay(2000);
-						reset();
-					}
-					else if (playerSplitDone == true) {
-						dealer->getCard(0)->setBack(false);
-						while (dealer->getTotal() < 17)
-							dealer->addCard(deck->getCard());
-						if (dealer->getTotal() > 21) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Dealer busted so Player hand wins" << endl;
-						}
-						if (dealer->getTotal() < player->getTotal()) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Player hand wins" << endl;
-						}
-						else if (dealer->getTotal() == player->getTotal()) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Player hand is a push" << endl;
-						}
-						else {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Dealer hand loses" << endl;
-						}
-
-						if (dealer->getTotal() < splitPlayer->getTotal()) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player split: " << splitPlayer->getTotal() << endl;
-							cout << "Player split hand wins" << endl;
-						}
-						else if (dealer->getTotal() == splitPlayer->getTotal()) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player split: " << splitPlayer->getTotal() << endl;
-							cout << "Player split hand is a push" << endl;
-						}
-						else {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player split: " << splitPlayer->getTotal() << endl;
-							cout << "Dealer split hand loses" << endl;
-						}
-						renderLoop();
-						SDL_Delay(2000);
-						reset();
+						dealerPlay();
+						resolve(hasSplit);
 					}
 				}
 				else if (!pass->isPressed() && pass->isVisible() && event.button.x >= pass->getXPos() && event.button.x <= pass->getXPos() + pass->getWidth() &&
@@ -271,42 +217,19 @@ void eventLoop()
 					if (!hasSplit)
 					{
 						cout << "Player passed" << endl;
+
 						renderLoop();
 						SDL_Delay(1500);
 						reset();
 					}
+					else if (hasSplit && !player1Done) {
+						cout << "Player passed" << endl;
+						player1Done = true;
+					}
 
-					else if (!playerSplitDone && player1Done)
+					else if (hasSplit && player1Done)
 					{
 						cout << "Player split hand passed" << endl;
-						playerSplitDone = true;
-
-						dealer->getCard(0)->setBack(false);
-						while (dealer->getTotal() < 17)
-							dealer->addCard(deck->getCard());
-						if (dealer->getTotal() > 21) {
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Dealer busted so Player hand wins" << endl;
-						}
-						if (dealer->getTotal() < player->getTotal())
-						{
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Player hand wins" << endl;
-						}
-						else if (dealer->getTotal() == player->getTotal())
-						{
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Player hand is a push" << endl;
-						}
-						else
-						{
-							cout << "Dealer: " << dealer->getTotal() << endl;
-							cout << "Player: " << player->getTotal() << endl;
-							cout << "Dealer hand loses" << endl;
-						}
 
 						renderLoop();
 						SDL_Delay(1500);
@@ -477,6 +400,9 @@ void reset() {
 	delete splitPlayer;
 	delete deck;
 
+	hasSplit = false;
+	player1Done = false;
+
 	deck = new Deck(renderer);
 	player = new Player();
 	splitPlayer = new Player();
@@ -500,58 +426,82 @@ void dealerPlay() {
 	if (dealer->getTotal() > 21) {
 		cout << "Dealer busted, so Player wins hand(s) that didn't bust/pass" << endl;
 	}
+}
 
+void resolve(bool splitvar) {
+	if (!splitvar) {
+		if (dealer->getTotal() > 21) {
+			cout << "Dealer: " << dealer->getTotal() << endl;
+			cout << "Player: " << player->getTotal() << endl;
+			cout << "Dealer busted so Player hand wins" << endl;
+		}
+		if (dealer->getTotal() < player->getTotal())
+		{
+			cout << "Dealer: " << dealer->getTotal() << endl;
+			cout << "Player: " << player->getTotal() << endl;
+			cout << "Player hand wins" << endl;
+		}
+		else if (dealer->getTotal() == player->getTotal())
+		{
+			cout << "Dealer: " << dealer->getTotal() << endl;
+			cout << "Player: " << player->getTotal() << endl;
+			cout << "Player hand is a push" << endl;
+		}
+		else
+		{
+			cout << "Dealer: " << dealer->getTotal() << endl;
+			cout << "Player: " << player->getTotal() << endl;
+			cout << "Dealer hand loses" << endl;
+		}
+	}
+	else {
+		if (player->hasBust()) {
+			if (dealer->getTotal() > 21) {
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player: " << player->getTotal() << endl;
+				cout << "Dealer busted so Player hand wins" << endl;
+			}
+			if (dealer->getTotal() < player->getTotal())
+			{
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player: " << player->getTotal() << endl;
+				cout << "Player hand wins" << endl;
+			}
+			else if (dealer->getTotal() == player->getTotal())
+			{
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player: " << player->getTotal() << endl;
+				cout << "Player hand is a push" << endl;
+			}
+			else
+			{
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player: " << player->getTotal() << endl;
+				cout << "Dealer hand loses" << endl;
+			}
+		}
+		if (splitPlayer->hasBust()) {
+			if (dealer->getTotal() < splitPlayer->getTotal()) {
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player split: " << splitPlayer->getTotal() << endl;
+				cout << "Player split hand wins" << endl;
+			}
+			else if (dealer->getTotal() == splitPlayer->getTotal()) {
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player split: " << splitPlayer->getTotal() << endl;
+				cout << "Player split hand is a push" << endl;
+			}
+			else {
+				cout << "Dealer: " << dealer->getTotal() << endl;
+				cout << "Player split: " << splitPlayer->getTotal() << endl;
+				cout << "Dealer split hand loses" << endl;
+			}
+		}
+	}
+	
 	renderLoop();
 	SDL_Delay(1500);
 	reset();
-}
-
-void resolve() {
-
-	/*if (HandValue(player.hand) > 21) {
-		cout << "You Lost this hand!" << endl;
-		CRED -= player.bet;
-		if (hasSplit == true)
-			PlayerChoiceSplit();
-		Game();
-	}
-	else if (HandValue(player.hand) == 21) {
-		if (HandValue(dealer.hand) == 21) {
-			cout << "Push!" << endl;
-			if (hasSplit == true)
-				EvaluateSplit();
-			Game();
-		}
-		else {
-			cout << "You win!" << endl;
-			CRED += player.bet;
-			if (hasSplit == true)
-				EvaluateSplit();
-			Game();
-		}
-	}
-	else if ((HandValue(player.hand) > (HandValue(dealer.hand))) || (HandValue(dealer.hand) > 21)) {
-		cout << "You win!" << endl;
-		CRED += player.bet;
-		if (hasSplit == true)
-			EvaluateSplit();
-		Game();
-	}
-	else if ((HandValue(player.hand)) == (HandValue(dealer.hand))) {
-		cout << "Push!" << endl;
-		if (hasSplit == true)
-			EvaluateSplit();
-		Game();
-	}
-	else {
-		cout << "You Lost this hand!" << endl;
-		CRED -= player.bet;
-		if (hasSplit == true)
-			EvaluateSplit();
-		Game();
-	}*/
-
-
 }
 
 void shutdown()
