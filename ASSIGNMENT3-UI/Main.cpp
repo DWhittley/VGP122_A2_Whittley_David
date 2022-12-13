@@ -216,7 +216,7 @@ void eventLoop()
 							cout << "Player: " << player->getTotal() << endl;
 							cout << "Dealer hand wins" << endl;
 						}
-							
+						renderLoop();
 						SDL_Delay(2000);
 						reset();
 					}
@@ -260,7 +260,7 @@ void eventLoop()
 							cout << "Player split: " << splitPlayer->getTotal() << endl;
 							cout << "Dealer split hand loses" << endl;
 						}
-						
+						renderLoop();
 						SDL_Delay(2000);
 						reset();
 					}
