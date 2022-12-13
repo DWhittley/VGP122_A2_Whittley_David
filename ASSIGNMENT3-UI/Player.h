@@ -18,9 +18,11 @@ public:
 	Card* popCard();
 	int getTotal();
 	int getCardCount();
+	bool hasBust();
+	void setBusted();
 
 private:
 	vector<Card*> hand;
-
+	bool _hasBust;
 	int total;
 };
