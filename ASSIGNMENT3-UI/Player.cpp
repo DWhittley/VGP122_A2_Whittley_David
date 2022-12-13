@@ -79,14 +79,14 @@ int Player::getTotal()
 		case 'A': // changed this logic from JP's to assess the Ace differently
 			temp += 1;
 			hasAce = true;
+			break;
 		default:
 			temp += (int)face - 48;
 			break;
 		}
 	}
-	if (hasAce = true && temp < 11)
+	if (hasAce = true && temp < 12)
 		temp += 10;
-	
 	return temp;
 
 }
@@ -102,4 +102,19 @@ bool Player::hasBust() {
 
 void Player::setBusted() {
 	_hasBust = true;
+}
+
+bool Player::hasPassed() {
+	return _hasPassed;
+}
+
+void Player::setPassed() {
+	_hasPassed = true;
+}
+
+bool Player::isDone() {
+	return _done;
+}
+void Player::setDone() {
+	_done = true;
 }

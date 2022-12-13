@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 
 #include "Card.h"
 
@@ -20,9 +21,15 @@ public:
 	int getCardCount();
 	bool hasBust();
 	void setBusted();
+	bool hasPassed();
+	void setPassed();
+	bool isDone();
+	void setDone();
 
 private:
 	vector<Card*> hand;
 	bool _hasBust;
 	int total;
+	bool _hasPassed;
+	bool _done;
 };
