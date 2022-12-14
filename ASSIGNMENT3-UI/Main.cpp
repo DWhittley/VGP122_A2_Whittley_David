@@ -423,7 +423,7 @@ void HIT() {
 			SDL_Delay(1500);
 			reset();
 		}
-		else if (splitPlayer->getTotal() > 21 && player->getTotal() < 22) {
+		else if (splitPlayer->getTotal() > 21) {
 			cout << "Player busted hand two." << endl;
 			splitPlayer->setBusted();
 			dealerPlay();

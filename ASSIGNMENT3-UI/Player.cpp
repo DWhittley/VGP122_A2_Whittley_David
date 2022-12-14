@@ -33,7 +33,7 @@ void Player::addCard(Card* c)
 	case 'K':
 		total += 10;
 		break;
-	case 'A': // changed this logic from JP's to assess the Ace differently
+	case 'A': // changed this logic from JP's to assess the Ace differently on deal
 		total += 1;
 		if (total <= 11)
 			total += 10;
