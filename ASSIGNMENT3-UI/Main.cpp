@@ -152,7 +152,7 @@ void eventLoop()
 					dealer->addCard(temp);
 
 					//player->addCard(deck->getCard());
-					player->addCard(player->getCard(0));//Split test logic
+					player->addCard(player->getCard(0));//Split test logic so that first hand is always splittable.
 					dealer->addCard(deck->getCard());
 				}
 				else if (!hit->isPressed() && hit->isVisible() && event.button.x >= hit->getXPos() && event.button.x <= hit->getXPos() + hit->getWidth() &&
